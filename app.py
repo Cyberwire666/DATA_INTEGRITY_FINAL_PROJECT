@@ -106,7 +106,7 @@ def admin_required(f):
 def before_request():
     """Run before each request to check session validity"""
     if 'username' in session:
-        # Check if user still exists in database
+        
         cur = mysql.connection.cursor()
         cur.execute("SELECT id FROM users WHERE username = %s", (session['username'],))
         if not cur.fetchone():
@@ -144,12 +144,7 @@ def register():
 
 @app.route('/qr/<username>')
 def qr_page(username):
-    return f'''
-        <h2>2FA Setup</h2>
-        <p>Scan this QR code with Google Authenticator or Authy:</p>
-        <img src="/qrcode/{username}" alt="QR Code"><br><br>
-        <a href="/login">Continue to Login</a>
-    '''
+    return render_template('qr_page.html', username=username)
 
 @app.route('/qrcode/<username>')
 def show_qr(username):
@@ -188,7 +183,7 @@ def login():
         
         flash('Invalid username or password', 'danger')
         return redirect(url_for('login'))
-    
+
     return render_template('login.html')
 
 @app.route('/2fa', methods=['GET', 'POST'])
@@ -348,7 +343,7 @@ def documents():
 def upload():
     if request.method == 'POST':
         app.logger.info("Upload request received")
-        
+
         try:
             # Check if file was uploaded
             if 'file' not in request.files:
@@ -682,6 +677,76 @@ def logout():
     session.clear()
     flash('You have been successfully logged out', 'success')
     return redirect(url_for('login'))
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        try:
+            new_username = request.form['username']
+            current_password = request.form['current_password']
+
+            # Verify current password
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT password FROM users WHERE username = %s", (session['username'],))
+            user = cur.fetchone()
+            
+            if not user or not bcrypt.check_password_hash(user[0], current_password):
+                flash('Current password is incorrect', 'danger')
+                return redirect(url_for('edit_profile'))
+            
+            # Check if new username is already taken
+            if new_username != session['username']:
+                cur.execute("SELECT id FROM users WHERE username = %s", (new_username,))
+                if cur.fetchone():
+                    flash('Username is already taken', 'danger')
+                    return redirect(url_for('edit_profile'))
+            
+            # Handle photo upload
+            if 'photo' in request.files:
+                photo = request.files['photo']
+                if photo.filename != '':
+                    if allowed_file(photo.filename):
+                        # Save the new photo
+                        filename = secure_filename(new_username + '.jpg')
+                        photo_path = os.path.join('static/profile_photos', filename)
+                        photo.save(photo_path)
+                        
+                        # Delete old photo if it exists
+                        old_photo = os.path.join('static/profile_photos', session['username'] + '.jpg')
+                        if os.path.exists(old_photo):
+                            os.remove(old_photo)
+                    else:
+                        flash('Invalid file type. Please upload an image.', 'danger')
+                        return redirect(url_for('edit_profile'))
+            
+            # Update username in database
+            cur.execute("UPDATE users SET username = %s WHERE username = %s", 
+                       (new_username, session['username']))
+            mysql.connection.commit()
+            
+            # Update session
+            session['username'] = new_username
+            
+            # Log the action
+            log_action(new_username, 'profile_update', 'Updated profile information')
+            
+            flash('Profile updated successfully', 'success')
+            return redirect(url_for('home'))
+            
+        except Exception as e:
+            app.logger.error(f"Error updating profile: {str(e)}")
+            app.logger.error(f"Error details: {traceback.format_exc()}")
+            flash('An error occurred while updating your profile', 'danger')
+            return redirect(url_for('edit_profile'))
+        finally:
+            cur.close()
+
+    return render_template('edit_profile.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
