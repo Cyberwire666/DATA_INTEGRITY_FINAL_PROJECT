@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SecureDocs{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-tachometer-alt text-primary me-2"></i>Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">Welcome back, {{ session.username }}!</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary">
+                        <i class="fas fa-user-shield me-1"></i>{{ session.role|capitalize }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-file-upload text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Upload Document</h5>
+                            <p class="text-muted mb-0">Secure your files</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('upload') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-upload me-2"></i>Upload Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-folder text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">My Documents</h5>
+                            <p class="text-muted mb-0">Manage your files</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('documents') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-folder-open me-2"></i>View Documents
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if session.role == 'admin' %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-cog text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Admin Panel</h5>
+                            <p class="text-muted mb-0">Manage users and system</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-cog me-2"></i>Go to Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>Security Features
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-lock text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Two-Factor Authentication</h6>
+                                    <p class="text-muted mb-0">Enhanced account security with 2FA</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-signature text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Document Integrity</h6>
+                                    <p class="text-muted mb-0">Verify document authenticity</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-encryption text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">File Encryption</h6>
+                                    <p class="text-muted mb-0">Secure file storage with encryption</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-history text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Activity Logging</h6>
+                                    <p class="text-muted mb-0">Track all system activities</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
