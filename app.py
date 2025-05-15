@@ -105,15 +105,35 @@ def admin_required(f):
 @app.before_request
 def before_request():
     """Run before each request to check session validity"""
+    # If the logging out flag is set, briefly bypass the full session check
+    if session.pop('_logging_out', False):
+        # This request is likely part of the logout sequence or immediate redirect
+        return # Allow the request to proceed without full session check
+
+    # List of endpoints that should NOT trigger the session check
+    # These are typically login, registration, and OAuth callback endpoints
+    allowed_endpoints = [
+        'login', 'register', 'qr_page', 'show_qr', 'two_factor',
+        'google.login', 'google.authorized', 'github.login', 'github.authorized',
+        'google_login', # Add exemption for the google_login route
+        'static' # Allow access to static files (CSS, JS, images)
+    ]
+
+    # Check if the requested endpoint is one of the allowed endpoints
+    if request.endpoint in allowed_endpoints or request.endpoint is None:
+        # If endpoint is None, it might be the favicon or other non-routed request
+        return # Allow the request to proceed without session check
+
+    # Now perform the session validity check only for other endpoints
     if 'username' in session:
-        
         cur = mysql.connection.cursor()
         cur.execute("SELECT id FROM users WHERE username = %s", (session['username'],))
         if not cur.fetchone():
-            session.clear()
-            flash('Your session has expired. Please log in again.', 'warning')
+            session.clear() # Clear the whole session if user not found in DB
+            flash('Your session has expired. Please log in again', 'warning')
             return redirect(url_for('login'))
         cur.close()
+    # If 'username' is not in session, login_required decorator will handle redirection for protected routes
 
 @app.route('/')
 @login_required
@@ -223,6 +243,11 @@ def two_factor():
 
 @app.route('/google-login')
 def google_login():
+    # If the user is already logged in, redirect them
+    if is_logged_in():
+        flash('You are already logged in.', 'info')
+        return redirect(url_for('home'))
+
     if not google.authorized:
         return redirect(url_for("google.login"))
 
@@ -235,26 +260,42 @@ def google_login():
     username = email.split("@")[0]
 
     cur = mysql.connection.cursor()
-    cur.execute("SELECT id, role FROM users WHERE email = %s", (email,))
+    cur.execute("SELECT id, role, 2fa_secret FROM users WHERE email = %s", (email,))
     user = cur.fetchone()
 
     if user:
-        session['username'] = username
-        session['role'] = user[1]
+        user_id, role, twofa_secret = user
+        session['pre_2fa_user'] = username
+        session['role'] = role
+
+        # Check if the user has a 2FA secret set
+        if twofa_secret:
+            cur.close()
+            return redirect(url_for('two_factor'))  # Force 2FA
+        else:
+            session.pop('pre_2fa_user', None)
+            session['username'] = username
+            cur.close()
+            return redirect(url_for('home'))
     else:
+        # New user - insert them
         cur.execute("""
             INSERT INTO users (username, email, password, role, 2fa_secret)
             VALUES (%s, %s, %s, %s, %s)
-        """, (username, email, '', 'user', ''))
+        """, (username, email, '', 'user', ''))  # No 2FA secret for new OAuth user
         mysql.connection.commit()
         session['username'] = username
         session['role'] = 'user'
-
-    cur.close()
-    return redirect(url_for('home'))
+        cur.close()
+        return redirect(url_for('home'))
 
 @app.route('/github-login')
 def github_login():
+    # If the user is already logged in, redirect them
+    if is_logged_in():
+        flash('You are already logged in.', 'info')
+        return redirect(url_for('home'))
+
     if not github.authorized:
         return redirect(url_for("github.login"))
 
@@ -674,7 +715,17 @@ def delete_document(doc_id):
 
 @app.route('/logout')
 def logout():
-    session.clear()
+    # Set a flag to temporarily disable session check in before_request
+    session['_logging_out'] = True
+
+    # Clear only the application-specific session keys
+    session.pop('username', None)
+    session.pop('role', None)
+    session.pop('pre_2fa_user', None)
+
+    # After a short delay (or on the next request), the flag will be removed.
+    # For simplicity, we'll handle the flag check in before_request.
+
     flash('You have been successfully logged out', 'success')
     return redirect(url_for('login'))
 
