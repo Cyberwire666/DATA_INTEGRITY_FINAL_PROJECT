@@ -10,6 +10,9 @@ import qrcode
 from datetime import datetime, timedelta
 import traceback
 from dotenv import load_dotenv
+import logging
+from logging.handlers import RotatingFileHandler
+import hashlib
 
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
@@ -37,6 +40,16 @@ Session(app)
 
 # Initialize error handlers
 init_error_handlers(app)
+
+# Configure logging to a file
+log_file_path = os.path.join(app.root_path, 'application.log')
+file_handler = RotatingFileHandler(log_file_path, maxBytes=10240, backupCount=10)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+file_handler.setLevel(logging.INFO)
+
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
 
 # MySQL config
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'localhost')
@@ -158,6 +171,8 @@ def register():
         mysql.connection.commit()
         cur.close()
 
+        log_action(username, 'register', 'User registered successfully')
+
         return redirect(url_for('qr_page', username=username))
 
     return render_template('register.html')
@@ -181,6 +196,8 @@ def show_qr(username):
     img.save(buf)
     buf.seek(0)
 
+    log_action(username, 'qr_code', f'Generated QR code for 2FA for user {username}')
+
     return send_file(buf, mimetype='image/png')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -199,8 +216,12 @@ def login():
 
         if user and bcrypt.check_password_hash(user[3], password):
             session['pre_2fa_user'] = user[1]
+            # Log successful password verification, pending 2FA
+            log_action(username, 'login_manual_password_success', f'Password verified for user {username}. Proceeding to 2FA.')
             return redirect(url_for('two_factor'))
         
+        # Log failed login attempt
+        log_action(username, 'login_manual_failed', f'Failed login attempt for user {username}')
         flash('Invalid username or password', 'danger')
         return redirect(url_for('login'))
 
@@ -233,9 +254,12 @@ def two_factor():
             session['username'] = username
             session['role'] = role
             session.permanent = True  # Make session permanent
+            log_action(username, 'login_manual_2fa_success', f'User {username} successfully completed 2FA and logged in manually.')
             flash('Successfully logged in', 'success')
             return redirect(url_for('home'))
         else:
+            # Log failed 2FA attempt
+            log_action(username, 'login_manual_2fa_failed', f'User {username} failed 2FA. Invalid code.')
             flash('Invalid 2FA code. Please try again.', 'danger')
             return render_template('2fa.html')
 
@@ -248,46 +272,78 @@ def google_login():
         flash('You are already logged in.', 'info')
         return redirect(url_for('home'))
 
+    # Log initiation of Google login
+    log_action(session.get('username', 'anonymous'), 'login_google_initiate', 'Initiated Google login process')
+    return redirect(url_for("google.login")) # This redirects to the Google OAuth flow
+
+@app.route('/login/google/authorized')
+def google_authorized():
     if not google.authorized:
-        return redirect(url_for("google.login"))
+        # Log failed Google login
+        log_action(session.get('username', 'anonymous'), 'login_google_failed', 'Google login failed or was denied')
+        flash('Google login failed.', 'danger')
+        return redirect(url_for('login'))
 
-    resp = google.get("/oauth2/v2/userinfo")
-    if not resp.ok:
-        return "Failed to fetch user info from Google."
+    try:
+        resp = google.get("/oauth2/v2/userinfo")
+        resp.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+        user_info = resp.json()
+        google_id = user_info['id']
+        email = user_info.get('email')
+        username = user_info.get('name', email)
 
-    info = resp.json()
-    email = info.get("email")
-    username = email.split("@")[0]
+        cur = mysql.connection.cursor()
 
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT id, role, 2fa_secret FROM users WHERE email = %s", (email,))
-    user = cur.fetchone()
+        # Check if user exists by Google ID
+        cur.execute("SELECT * FROM users WHERE google_id = %s", (google_id,))
+        user = cur.fetchone()
 
-    if user:
-        user_id, role, twofa_secret = user
-        session['pre_2fa_user'] = username
-        session['role'] = role
-
-        # Check if the user has a 2FA secret set
-        if twofa_secret:
-            cur.close()
-            return redirect(url_for('two_factor'))  # Force 2FA
+        if user:
+            # User exists, log them in
+            session['username'] = user[1] # username
+            session['role'] = user[5] # Assuming role is at index 5
+            session.permanent = True
+            log_action(session['username'], 'login_google_success', f'User {session["username"]} logged in successfully with Google.')
+            flash('Successfully logged in with Google', 'success')
         else:
-            session.pop('pre_2fa_user', None)
+            # New user, register them
+            # Check if email already exists for a non-Google user
+            cur.execute("SELECT * FROM users WHERE email = %s AND google_id IS NULL", (email,))
+            existing_user_with_email = cur.fetchone()
+
+            if existing_user_with_email:
+                # Email exists but is not linked to Google, inform user
+                flash('An account with this email already exists. Please log in with your existing method or link your Google account in profile settings.', 'warning')
+                log_action(username or 'anonymous', 'login_google_failed_email_exists', f'Google login failed for email {email}. Email already registered.')
+                return redirect(url_for('login'))
+
+            # Generate a random password (not used for login, just to satisfy DB schema if password is NOT NULL)
+            # and a 2FA secret (can be null for OAuth users or generated)
+            import secrets
+            random_password = secrets.token_urlsafe(16)
+            totp_secret = None # Or generate one if 2FA is mandatory
+
+            cur.execute("""
+                INSERT INTO users (username, email, password, google_id, 2fa_secret, role)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (username, email, random_password, google_id, totp_secret, 'user'))
+            mysql.connection.commit()
+            
             session['username'] = username
-            cur.close()
-            return redirect(url_for('home'))
-    else:
-        # New user - insert them
-        cur.execute("""
-            INSERT INTO users (username, email, password, role, 2fa_secret)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (username, email, '', 'user', ''))  # No 2FA secret for new OAuth user
-        mysql.connection.commit()
-        session['username'] = username
-        session['role'] = 'user'
+            session['role'] = 'user'
+            session.permanent = True
+            log_action(username, 'register_google', f'New user {username} registered and logged in with Google.')
+            flash('Successfully registered and logged in with Google', 'success')
+
         cur.close()
         return redirect(url_for('home'))
+
+    except Exception as e:
+        app.logger.error(f"Error during Google login: {str(e)}")
+        app.logger.error(f"Error details: {traceback.format_exc()}")
+        log_action(session.get('username', 'anonymous'), 'login_google_error', f'Error during Google login: {str(e)}')
+        flash('An error occurred during Google login', 'danger')
+        return redirect(url_for('login'))
 
 @app.route('/github-login')
 def github_login():
@@ -296,43 +352,78 @@ def github_login():
         flash('You are already logged in.', 'info')
         return redirect(url_for('home'))
 
+    # Log initiation of GitHub login
+    log_action(session.get('username', 'anonymous'), 'login_github_initiate', 'Initiated GitHub login process')
+    return redirect(url_for("github.login")) # This redirects to the GitHub OAuth flow
+
+@app.route('/login/github/authorized')
+def github_authorized():
     if not github.authorized:
-        return redirect(url_for("github.login"))
+        # Log failed GitHub login
+        log_action(session.get('username', 'anonymous'), 'login_github_failed', 'GitHub login failed or was denied')
+        flash('GitHub login failed.', 'danger')
+        return redirect(url_for('login'))
 
-    resp = github.get("/user")
-    if not resp.ok:
-        return "Failed to fetch user info from GitHub."
+    try:
+        resp = github.get("/user")
+        resp.raise_for_status()
+        github_user_info = resp.json()
+        github_id = str(github_user_info['id'])
+        username = github_user_info.get('login')
+        email = github_user_info.get('email')
 
-    info = resp.json()
-    username = info.get("login")
+        cur = mysql.connection.cursor()
 
-    email_resp = github.get("/user/emails")
-    if not email_resp.ok:
-        return "Failed to fetch GitHub emails."
+        # Check if user exists by GitHub ID
+        cur.execute("SELECT * FROM users WHERE github_id = %s", (github_id,))
+        user = cur.fetchone()
 
-    emails = email_resp.json()
-    primary_email = next((e["email"] for e in emails if e["primary"]), None)
-    if not primary_email:
-        return "Primary GitHub email not found."
+        if user:
+            # User exists, log them in
+            session['username'] = user[1] # username
+            session['role'] = user[5] # Assuming role is at index 5
+            session.permanent = True
+            log_action(session['username'], 'login_github_success', f'User {session["username"]} logged in successfully with GitHub.')
+            flash('Successfully logged in with GitHub', 'success')
+        else:
+             # New user, register them
+            # Check if email already exists for a non-GitHub user
+            if email:
+                cur.execute("SELECT * FROM users WHERE email = %s AND github_id IS NULL", (email,))
+                existing_user_with_email = cur.fetchone()
 
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT id, role FROM users WHERE email = %s", (primary_email,))
-    user = cur.fetchone()
+                if existing_user_with_email:
+                    # Email exists but is not linked to GitHub, inform user
+                    flash('An account with this email already exists. Please log in with your existing method or link your GitHub account in profile settings.', 'warning')
+                    log_action(username or 'anonymous', 'login_github_failed_email_exists', f'GitHub login failed for email {email}. Email already registered.')
+                    return redirect(url_for('login'))
 
-    if user:
-        session['username'] = username
-        session['role'] = user[1]
-    else:
-        cur.execute("""
-            INSERT INTO users (username, email, password, role, 2fa_secret)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (username, primary_email, '', 'user', ''))
-        mysql.connection.commit()
-        session['username'] = username
-        session['role'] = 'user'
+            # Generate a random password and a 2FA secret (can be null for OAuth users)
+            import secrets
+            random_password = secrets.token_urlsafe(16)
+            totp_secret = None # Or generate one if 2FA is mandatory
 
-    cur.close()
-    return redirect(url_for('home'))
+            cur.execute("""
+                INSERT INTO users (username, email, password, github_id, 2fa_secret, role)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (username, email, random_password, github_id, totp_secret, 'user'))
+            mysql.connection.commit()
+
+            session['username'] = username
+            session['role'] = 'user'
+            session.permanent = True
+            log_action(username, 'register_github', f'New user {username} registered and logged in with GitHub.')
+            flash('Successfully registered and logged in with GitHub', 'success')
+
+        cur.close()
+        return redirect(url_for('home'))
+
+    except Exception as e:
+        app.logger.error(f"Error during GitHub login: {str(e)}")
+        app.logger.error(f"Error details: {traceback.format_exc()}")
+        log_action(session.get('username', 'anonymous'), 'login_github_error', f'Error during GitHub login: {str(e)}')
+        flash('An error occurred during GitHub login', 'danger')
+        return redirect(url_for('login'))
 
 @app.route('/documents')
 @login_required
@@ -497,16 +588,28 @@ def allowed_file(filename):
 
 def log_action(username, action_type, message):
     try:
+        # Log to database
         cur = mysql.connection.cursor()
         cur.execute("""
             INSERT INTO logs (username, action_type, message)
             VALUES (%s, %s, %s)
         """, (username, action_type, message))
         mysql.connection.commit()
+
+        # Log to file
+        app.logger.info(f'Action: {action_type}, User: {username}, Details: {message}')
+
     except Exception as e:
-        app.logger.error(f"Error logging action: {str(e)}")
+        app.logger.error(f"Error logging action to database: {str(e)}")
+        # Still attempt to log to file even if DB logging fails
+        try:
+             app.logger.error(f'Failed DB Log - Action: {action_type}, User: {username}, Details: {message} - Error: {str(e)}')
+        except Exception as file_log_error:
+             print(f"Critical error: Failed to log to both database and file. {file_log_error}")
+
     finally:
-        cur.close()
+        if 'cur' in locals() and cur:
+            cur.close()
 
 @app.route('/download/<int:doc_id>')
 @login_required
@@ -798,6 +901,163 @@ def edit_profile():
             cur.close()
 
     return render_template('edit_profile.html')
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    # This is the main admin dashboard route
+    cur = None
+    try:
+        cur = mysql.connection.cursor()
+
+        # Fetch all users
+        cur.execute("SELECT id, username, email, role FROM users")
+        users = cur.fetchall()
+
+        # Fetch all files
+        cur.execute("SELECT d.id, d.original_filename, u.username, d.upload_time FROM documents d JOIN users u ON d.user_id = u.id")
+        files = cur.fetchall()
+
+        return render_template('admin.html', users=users, files=files)
+
+    except Exception as e:
+        app.logger.error(f"Error fetching data for admin dashboard: {str(e)}")
+        app.logger.error(f"Error details: {traceback.format_exc()}")
+        flash('An error occurred while loading the admin dashboard.', 'danger')
+        return redirect(url_for('home'))
+    finally:
+        if cur:
+            cur.close()
+
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_user(user_id):
+    cur = None
+    try:
+        cur = mysql.connection.cursor()
+
+        # Prevent deleting the last admin user (optional but recommended)
+        cur.execute("SELECT COUNT(*) FROM users WHERE role = 'admin'")
+        admin_count = cur.fetchone()[0]
+
+        cur.execute("SELECT role FROM users WHERE id = %s", (user_id,))
+        user_role = cur.fetchone()[0]
+
+        if user_role == 'admin' and admin_count <= 1:
+            flash('Cannot delete the last admin user.', 'danger')
+            log_action(session['username'], 'admin_delete_user_failed', f'Attempted to delete the last admin user with ID {user_id}.')
+            return redirect(url_for('admin_dashboard'))
+
+        # Delete user's files first
+        cur.execute("SELECT filename FROM documents WHERE user_id = %s", (user_id,))
+        user_files = cur.fetchall()
+        for file in user_files:
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], file[0])
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                    app.logger.info(f"Admin deleted user file from filesystem: {file_path}")
+                except Exception as e:
+                    app.logger.error(f"Admin error deleting user file {file[0]}: {str(e)}")
+                    # Log file deletion failure
+                    log_action(session['username'], 'admin_delete_user_file_failed', f'Admin failed to delete file {file[0]} for user ID {user_id}: {str(e)}')
+
+        cur.execute("DELETE FROM documents WHERE user_id = %s", (user_id,))
+        cur.execute("DELETE FROM logs WHERE username = (SELECT username FROM users WHERE id = %s)", (user_id,)) # Delete user's logs
+        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        mysql.connection.commit()
+
+        flash('User and associated files deleted successfully.', 'success')
+        log_action(session['username'], 'admin_delete_user_success', f'Admin deleted user with ID {user_id}.')
+
+        return redirect(url_for('admin_dashboard'))
+
+    except Exception as e:
+        app.logger.error(f"Error deleting user from admin panel: {str(e)}")
+        app.logger.error(f"Error details: {traceback.format_exc()}")
+        flash('An error occurred while deleting the user.', 'danger')
+        log_action(session['username'], 'admin_delete_user_error', f'An error occurred while deleting user with ID {user_id}: {str(e)}')
+        return redirect(url_for('admin_dashboard'))
+    finally:
+        if cur:
+            cur.close()
+
+@app.route('/admin/file/<int:file_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_file(file_id):
+    cur = None
+    try:
+        cur = mysql.connection.cursor()
+
+        # Get file information before deleting
+        cur.execute("SELECT filename, original_filename FROM documents WHERE id = %s", (file_id,))
+        file_info = cur.fetchone()
+
+        if not file_info:
+            flash('File not found.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+
+        stored_filename, original_filename = file_info
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], stored_filename)
+
+        # Delete file from filesystem
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                app.logger.info(f"Admin deleted file from filesystem: {file_path}")
+            except Exception as e:
+                app.logger.error(f"Admin error deleting file from filesystem {stored_filename}: {str(e)}")
+                # Log file deletion failure
+                log_action(session['username'], 'admin_delete_file_filesystem_failed', f'Admin failed to delete file from filesystem {stored_filename}: {str(e)}')
+
+        # Delete from database
+        cur.execute("DELETE FROM logs WHERE message LIKE %s", (f'%{original_filename}%',))
+        cur.execute("DELETE FROM documents WHERE id = %s", (file_id,))
+        mysql.connection.commit()
+
+        flash('File deleted successfully.', 'success')
+        log_action(session['username'], 'admin_delete_file_success', f'Admin deleted file with ID {file_id} ({original_filename}).')
+
+        return redirect(url_for('admin_dashboard'))
+
+    except Exception as e:
+        app.logger.error(f"Error deleting file from admin panel: {str(e)}")
+        app.logger.error(f"Error details: {traceback.format_exc()}")
+        flash('An error occurred while deleting the file.', 'danger')
+        log_action(session['username'], 'admin_delete_file_error', f'An error occurred while deleting file with ID {file_id}: {str(e)}')
+        return redirect(url_for('admin_dashboard'))
+    finally:
+        if cur:
+            cur.close()
+
+@app.route('/admin/logs')
+@admin_required
+def admin_logs():
+    cur = None
+    try:
+        cur = mysql.connection.cursor()
+        # Fetch all logs, ordered by timestamp
+        cur.execute("SELECT timestamp, username, action_type, message FROM logs ORDER BY timestamp DESC")
+        logs = cur.fetchall()
+
+        return render_template('admin_logs.html', logs=logs)
+
+    except Exception as e:
+        app.logger.error(f"Error fetching logs for admin panel: {str(e)}")
+        app.logger.error(f"Error details: {traceback.format_exc()}")
+        flash('An error occurred while loading the logs.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+    finally:
+        if cur:
+            cur.close()
+
+@app.after_request
+def add_security_headers(response):
+    # Prevent caching of sensitive pages
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
