@@ -1,0 +1,29 @@
+# Web Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Database
+Flask-MySQLdb==2.0.0
+mysql-connector-python==8.2.0
+
+# Security & Authentication
+Flask-Bcrypt==1.0.1
+Flask-Session==0.5.0
+Flask-Dance==7.0.0
+PyCryptodome==3.19.0
+pyotp==2.9.0
+qrcode[pil]==7.4.2
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Utilities
+Pillow==10.1.0
+requests==2.31.0
+cryptography==41.0.7
+
+# Development & Testing
+pytest==7.4.3
+pytest-flask==1.3.0
+black==23.11.0
+flake8==6.1.0 
