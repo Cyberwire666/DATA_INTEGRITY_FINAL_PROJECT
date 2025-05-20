@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureDocs{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2c3e50;
+            --text-color: #333;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --info-color: #3498db;
+            --gradient-primary: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            --gradient-success: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            --gradient-danger: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            --gradient-warning: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+            --gradient-info: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #1e1e2e;
+            --secondary-color: #89b4fa;
+            --accent-color: #f38ba8;
+            --light-bg: #181825;
+            --dark-bg: #1e1e2e;
+            --text-color: #ffffff;
+            --card-bg: #313244;
+            --border-color: #45475a;
+        }
+
+        [data-theme="dark"] .navbar {
+            background-color: #1e1e2e;
+            border-bottom: 1px solid #45475a;
+        }
+
+        [data-theme="dark"] .nav-link {
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] .nav-link:hover {
+            color: #89b4fa !important;
+        }
+
+        [data-theme="dark"] .card {
+            background-color: #313244;
+            border-color: #45475a;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .table {
+            background-color: #313244;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .table thead {
+            background-color: #45475a;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .form-control {
+            background-color: #45475a;
+            border-color: #585b70;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .form-control::placeholder {
+            color: #a0a0a0;
+        }
+
+        [data-theme="dark"] .form-control:focus {
+            background-color: #45475a;
+            border-color: #89b4fa;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.2rem rgba(137, 180, 250, 0.25);
+        }
+
+        [data-theme="dark"] .form-control:disabled {
+            background-color: #313244;
+            color: #a0a0a0;
+        }
+
+        [data-theme="dark"] .form-label {
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .form-text {
+            color: #a0a0a0;
+        }
+
+        [data-theme="dark"] .form-select {
+            background-color: #45475a;
+            border-color: #585b70;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .form-select:focus {
+            background-color: #45475a;
+            border-color: #89b4fa;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.2rem rgba(137, 180, 250, 0.25);
+        }
+
+        [data-theme="dark"] .form-check-label {
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .form-check-input {
+            background-color: #45475a;
+            border-color: #585b70;
+        }
+
+        [data-theme="dark"] .form-check-input:checked {
+            background-color: #89b4fa;
+            border-color: #89b4fa;
+        }
+
+        [data-theme="dark"] .form-check-input:focus {
+            border-color: #89b4fa;
+            box-shadow: 0 0 0 0.2rem rgba(137, 180, 250, 0.25);
+        }
+
+        [data-theme="dark"] .dropdown-menu {
+            background-color: #313244;
+            border-color: #45475a;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .dropdown-item {
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .dropdown-item:hover {
+            background-color: #45475a;
+            color: #89b4fa;
+        }
+
+        [data-theme="dark"] .alert {
+            background-color: #313244;
+            color: #ffffff;
+            border: 1px solid #45475a;
+        }
+
+        [data-theme="dark"] .alert-success {
+            background-color: #2d4a2d;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .alert-danger {
+            background-color: #4a2d2d;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .alert-warning {
+            background-color: #4a3d2d;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .alert-info {
+            background-color: #2d3d4a;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .footer {
+            background-color: #1e1e2e;
+            color: #ffffff;
+            border-top: 1px solid #45475a;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            color: #89b4fa;
+            background-color: rgba(137, 180, 250, 0.1);
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background-color: #89b4fa;
+            border-color: #89b4fa;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .btn-primary:hover {
+            background-color: #74c7ec;
+            border-color: #74c7ec;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .btn-danger {
+            background-color: #f38ba8;
+            border-color: #f38ba8;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .btn-danger:hover {
+            background-color: #f5c2e7;
+            border-color: #f5c2e7;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: #a0a0a0 !important;
+        }
+
+        [data-theme="dark"] .text-secondary {
+            color: #89b4fa !important;
+        }
+
+        [data-theme="dark"] .text-success {
+            color: #a6e3a1 !important;
+        }
+
+        [data-theme="dark"] .text-danger {
+            color: #f38ba8 !important;
+        }
+
+        [data-theme="dark"] .text-warning {
+            color: #fab387 !important;
+        }
+
+        [data-theme="dark"] .text-info {
+            color: #89b4fa !important;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            background-image: 
+                radial-gradient(circle at 100% 0%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 0% 100%, rgba(46, 204, 113, 0.1) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 0 2rem;
+        }
+
+        .navbar {
+            background: var(--gradient-primary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            padding: 0.7rem 1.2rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::before {
+            width: 100%;
+        }
+
+        .profile-pic {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.8);
+            transition: border-color 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .profile-pic:hover {
+            border-color: white;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .user-menu:hover {
+            color: white;
+            text-decoration: none;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: var(--secondary-color);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            margin-right: 8px;
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+        }
+
+        .main-content {
+            padding: 3rem 0;
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 600;
+            border-bottom: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+        }
+
+        .btn-danger {
+            background: var(--gradient-danger);
+            border: none;
+        }
+
+        .form-control {
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
+            background: white;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .alert-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .alert-danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
+        .alert-warning {
+            background: var(--gradient-warning);
+            color: #2c3e50;
+        }
+
+        .alert-info {
+            background: var(--gradient-info);
+            color: white;
+        }
+
+        .table {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        .table thead {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .table th {
+            font-weight: 600;
+            padding: 1.2rem;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .table td {
+            padding: 1.2rem;
+            vertical-align: middle;
+            border-color: var(--border-color);
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+            transform: scale(1.01);
+        }
+
+        .footer {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 3rem 0;
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+        }
+
+        .footer p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .theme-toggle:hover {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .theme-toggle i {
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle .theme-text {
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1.5rem;
+            }
+
+            .card-body {
+                padding: 1.2rem;
+            }
+
+            .btn {
+                padding: 0.7rem 1.2rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+
+            .table th, .table td {
+                padding: 0.8rem;
+            }
+
+            .navbar-collapse {
+                padding: 1rem 0;
+            }
+
+            .theme-toggle {
+                position: static;
+                transform: none;
+                margin: 0.5rem 0;
+                justify-content: center;
+                width: 100%;
+                padding: 0.8rem;
+                background: rgba(255,255,255,0.1);
+                border-radius: 8px;
+            }
+
+            .theme-toggle .theme-text {
+                display: inline-block;
+            }
+
+            .nav-item.dropdown {
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+                padding: 0.8rem;
+                background: rgba(255,255,255,0.1);
+                border-radius: 8px;
+                margin: 0;
+            }
+
+            .dropdown-menu {
+                width: 100%;
+                text-align: center;
+                margin-top: 0.5rem;
+                background: rgba(30, 30, 46, 0.95);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+
+            .dropdown-item {
+                padding: 0.8rem;
+            }
+
+            .profile-pic {
+                width: 30px;
+                height: 30px;
+            }
+
+            .navbar-nav {
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-link {
+                text-align: center;
+                padding: 0.8rem !important;
+                margin: 0.2rem 0;
+                background: rgba(255,255,255,0.1);
+                border-radius: 8px;
+            }
+        }
+
+        /* Additional responsive fixes */
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .theme-toggle, .user-menu {
+                padding: 0.6rem;
+            }
+
+            .profile-pic {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-bg);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 5px;
+            border: 2px solid var(--light-bg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .card, .alert, .table {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Glass effect for cards in dark mode */
+        [data-theme="dark"] .card {
+            background: rgba(30, 30, 46, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+        }
+
+        [data-theme="dark"] .form-control {
+            background: rgba(30, 30, 46, 0.7);
+            border-color: var(--glass-border);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>SecureDocs
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if session.username %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/upload">
+                                <i class="fas fa-upload me-1"></i>Upload
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/documents">
+                                <i class="fas fa-file-alt me-1"></i>Documents
+                            </a>
+                        </li>
+                        {% if session.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin">
+                                    <i class="fas fa-user-shield me-1"></i>Admin
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/logs">
+                                    <i class="fas fa-history me-1"></i>Logs
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/register">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+                {% if session.username %}
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item">
+                        <button id="theme-toggle" class="btn btn-link nav-link">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{{ url_for('get_profile_photo', username=session.username) }}" 
+                                 alt="Profile" 
+                                 class="profile-pic"
+                                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_profile.jpg') }}';">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('edit_profile') }}"><i class="fas fa-user-edit me-2"></i>Edit Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {% if category == 'success' %}
+                                <i class="fas fa-check-circle me-2"></i>
+                            {% elif category == 'danger' %}
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% elif category == 'info' %}
+                                <i class="fas fa-info-circle me-2"></i>
+                            {% endif %}
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 SecureDocs. All rights reserved.</p>
+            <p class="mb-0">Secure, Simple, and Reliable Document Management</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+
+            // Toggle theme
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                if (newTheme === 'dark') {
+                    themeIcon.classList.replace('fa-moon', 'fa-sun');
+                } else {
+                    themeIcon.classList.replace('fa-sun', 'fa-moon');
+                }
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Error - SecureDocs{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body p-5 text-center">
+                {% if error_code == 404 %}
+                    <i class="fas fa-exclamation-circle text-warning" style="font-size: 5rem;"></i>
+                    <h2 class="mt-4 mb-3">Page Not Found</h2>
+                    <p class="text-muted mb-4">The page you're looking for doesn't exist or has been moved.</p>
+                {% elif error_code == 403 %}
+                    <i class="fas fa-lock text-danger" style="font-size: 5rem;"></i>
+                    <h2 class="mt-4 mb-3">Access Denied</h2>
+                    <p class="text-muted mb-4">You don't have permission to access this resource.</p>
+                {% elif error_code == 500 %}
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 5rem;"></i>
+                    <h2 class="mt-4 mb-3">Server Error</h2>
+                    <p class="text-muted mb-4">Something went wrong on our end. Please try again later.</p>
+                {% else %}
+                    <i class="fas fa-exclamation-circle text-danger" style="font-size: 5rem;"></i>
+                    <h2 class="mt-4 mb-3">Oops! Something went wrong</h2>
+                    <p class="text-muted mb-4">{{ error_message }}</p>
+                {% endif %}
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="javascript:history.back()" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Go Back
+                    </a>
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

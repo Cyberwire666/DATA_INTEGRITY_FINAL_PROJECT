@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - SecureDocs{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    .team-card {
+        transition: transform 0.3s ease;
+    }
+    .team-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3">About SecureDocs</h1>
+            <p class="lead text-muted">Your Trusted Document Security Solution</p>
+        </div>
+    </div>
+
+    <!-- Mission Section -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">
+                        <i class="fas fa-bullseye text-primary me-2"></i>
+                        Our Mission
+                    </h2>
+                    <p class="card-text">
+                        At SecureDocs, we're committed to revolutionizing document security through advanced encryption, 
+                        integrity verification, and user-friendly interfaces. Our mission is to provide businesses and 
+                        individuals with a secure, reliable, and easy-to-use platform for managing sensitive documents.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">
+                        <i class="fas fa-eye text-primary me-2"></i>
+                        Our Vision
+                    </h2>
+                    <p class="card-text">
+                        We envision a world where document security is accessible to everyone. Through continuous 
+                        innovation and user-centric design, we aim to set new standards in digital document protection 
+                        while maintaining simplicity and efficiency.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Key Features</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-lock fa-2x text-primary"></i>
+                            </div>
+                            <h3 class="h5">Advanced Encryption</h3>
+                            <p class="card-text text-muted">
+                                State-of-the-art encryption algorithms ensure your documents remain secure and private.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                            </div>
+                            <h3 class="h5">Two-Factor Authentication</h3>
+                            <p class="card-text text-muted">
+                                Enhanced security with 2FA ensures only authorized users can access your documents.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-check-circle fa-2x text-primary"></i>
+                            </div>
+                            <h3 class="h5">Integrity Verification</h3>
+                            <p class="card-text text-muted">
+                                Verify document integrity with our advanced hashing and verification system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Our Team</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm team-card">
+                        <div class="card-body text-center p-4">
+                            <img src="{{ url_for('static', filename='team_photos/shadwa.jpg') }}" 
+                                 alt="Shadwa Ahmed" 
+                                 class="team-photo"
+                                 onerror="this.src='{{ url_for('static', filename='team_photos/default.jpg') }}'">
+                            <h3 class="h5">Shadwa Ahmed</h3>
+                            <p class="text-muted">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm team-card">
+                        <div class="card-body text-center p-4">
+                            <img src="{{ url_for('static', filename='team_photos/sara.jpg') }}" 
+                                 alt="Sara Ahmed" 
+                                 class="team-photo"
+                                 onerror="this.src='{{ url_for('static', filename='team_photos/default.jpg') }}'">
+                            <h3 class="h5">Sara Ahmed</h3>
+                            <p class="text-muted">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm team-card">
+                        <div class="card-body text-center p-4">
+                            <img src="{{ url_for('static', filename='team_photos/yehia.jpg') }}" 
+                                 alt="Yehia Tarek" 
+                                 class="team-photo"
+                                 onerror="this.src='{{ url_for('static', filename='team_photos/default.jpg') }}'">
+                            <h3 class="h5">Yehia Tarek</h3>
+                            <p class="text-muted">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm team-card">
+                        <div class="card-body text-center p-4">
+                            <img src="{{ url_for('static', filename='team_photos/mohamed.jpg') }}" 
+                                 alt="Mohamed Tamer" 
+                                 class="team-photo"
+                                 onerror="this.src='{{ url_for('static', filename='team_photos/default.jpg') }}'">
+                            <h3 class="h5">Mohamed Tamer</h3>
+                            <p class="text-muted">Developer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm team-card">
+                        <div class="card-body text-center p-4">
+                            <img src="{{ url_for('static', filename='team_photos/marawan.jpg') }}" 
+                                 alt="Marawan Farouk" 
+                                 class="team-photo"
+                                 onerror="this.src='{{ url_for('static', filename='team_photos/default.jpg') }}'">
+                            <h3 class="h5">Marawan Farouk</h3>
+                            <p class="text-muted">Developer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <h2 class="mb-4">Get in Touch</h2>
+                    <p class="lead mb-4">Have questions? We'd love to hear from you.</p>
+                    <a href="mailto:yehiaselim16@gmail.com" class="btn btn-primary">
+                        <i class="fas fa-envelope me-2"></i>
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

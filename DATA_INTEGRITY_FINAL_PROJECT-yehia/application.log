@@ -1,0 +1,56 @@
+2025-05-20 18:50:11,989 INFO: Action: admin_delete_file_success, User: admin, Details: Admin deleted file with ID 6 (second_test.txt). [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:34:49,899 INFO: Action: login_manual_password_success, User: Yehia, Details: Password verified for user Yehia. Proceeding to 2FA. [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:35:20,273 INFO: Action: login_manual_2fa_success, User: Yehia, Details: User Yehia successfully completed 2FA and logged in manually. [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:39:53,950 INFO: Action: register_success, User: omar, Details: User registered successfully. [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:39:53,950 INFO: Redirecting registered user omar to QR page. [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:235]
+2025-05-20 20:39:53,985 INFO: Accessing QR page for user: omar [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:250]
+2025-05-20 20:39:54,053 INFO: Generating QR code for user: omar [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:266]
+2025-05-20 20:39:54,055 INFO: Generated TOTP URI for omar: otpauth://totp/SecureDocs:omar?secret=7EQAA3W5SCXESDKC6JAUMH5FESWLF6N4&issuer=SecureDocs [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:282]
+2025-05-20 20:39:54,082 INFO: Action: qr_code_success, User: omar, Details: Generated QR code for 2FA for user omar [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:39:54,083 INFO: Successfully generated and sending QR code image for user omar. [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:291]
+2025-05-20 20:40:19,493 INFO: Action: login_manual_password_success, User: omar, Details: Password verified for user omar. Proceeding to 2FA. [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:40:25,434 INFO: Action: login_manual_2fa_success, User: omar, Details: User omar successfully completed 2FA and logged in manually. [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:40:25,533 ERROR: Error serving profile photo for omar: [WinError 2] The system cannot find the file specified: 'C:\\Users\\yehia\\OneDrive\\Desktop\\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\static/default_profile.jpg' [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:1143]
+2025-05-20 20:40:25,533 ERROR: Unhandled Error: [WinError 2] The system cannot find the file specified: 'C:\\Users\\yehia\\OneDrive\\Desktop\\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\static/default_profile.jpg' [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\error_handlers.py:53]
+2025-05-20 20:40:25,538 ERROR: Traceback (most recent call last):
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py", line 1141, in get_profile_photo
+    return send_file('static/default_profile.jpg')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\venv\Lib\site-packages\flask\helpers.py", line 511, in send_file
+    return werkzeug.utils.send_file(  # type: ignore[return-value]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\venv\Lib\site-packages\werkzeug\utils.py", line 428, in send_file
+    stat = os.stat(path)
+           ^^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\Users\\yehia\\OneDrive\\Desktop\\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\static/default_profile.jpg'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py", line 1144, in get_profile_photo
+    return send_file('static/default_profile.jpg')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\venv\Lib\site-packages\flask\helpers.py", line 511, in send_file
+    return werkzeug.utils.send_file(  # type: ignore[return-value]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\venv\Lib\site-packages\werkzeug\utils.py", line 428, in send_file
+    stat = os.stat(path)
+           ^^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\Users\\yehia\\OneDrive\\Desktop\\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\DATA_INTEGRITY_FINAL_PROJECT-yehia\\static/default_profile.jpg'
+ [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\error_handlers.py:54]
+2025-05-20 20:43:52,526 INFO: Action: profile_photo_update, User: omar, Details: Profile photo updated [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:43:52,529 INFO: Action: profile_update, User: omar, Details: Updated profile information [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:45:47,649 INFO: Action: profile_photo_remove, User: omar, Details: Profile photo removed [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:45:47,652 INFO: Action: profile_update, User: omar, Details: Updated profile information [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:52:47,782 INFO: Action: profile_photo_removed, User: omar, Details: Profile photo removed [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:52:47,784 INFO: Action: profile_update, User: omar, Details: Updated profile information [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:52:57,961 INFO: Action: profile_photo_update, User: omar, Details: Profile photo updated [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:52:57,963 INFO: Action: profile_update, User: omar, Details: Updated profile information [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:58:34,606 INFO: Action: profile_photo_removed, User: omar, Details: Profile photo removed [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
+2025-05-20 20:58:34,608 INFO: Action: profile_update, User: omar, Details: Updated profile information [in C:\Users\yehia\OneDrive\Desktop\FINNAAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLL\DATA_INTEGRITY_FINAL_PROJECT-yehia\DATA_INTEGRITY_FINAL_PROJECT-yehia\app.py:718]
