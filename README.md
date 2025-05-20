@@ -62,8 +62,8 @@ SecureDocs is a robust and secure document management system built with Flask th
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/secure-docs.git
-cd secure-docs
+git clone https://github.com/Cyberwire666/DATA_INTEGRITY_FINAL_PROJECT.git
+cd DATA_INTEGRITY_FINAL_PROJECT
 ```
 
 2. Create and activate a virtual environment:
@@ -163,3 +163,11 @@ For support, please open an issue in the GitHub repository or contact the develo
 - PyCryptodome for cryptographic functions
 - Bootstrap for the frontend framework
 - All other open-source contributors
+
+## Team
+- Yehia Tarek
+- Sara Hendy
+- Shadwa Ahmed
+- Mohamed Tamer
+- Marawan Farouk
+  
