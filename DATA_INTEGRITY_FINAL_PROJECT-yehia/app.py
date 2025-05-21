@@ -538,32 +538,75 @@ def documents():
 
         cur = mysql.connection.cursor()
 
-        if role == 'admin':
-            # Admins can see all documents
-            cur.execute("""
-                SELECT d.*, u.username 
-                FROM documents d 
-                JOIN users u ON d.user_id = u.id 
-                ORDER BY d.upload_time DESC
-            """)
-        else:
-            # Regular users only see their own documents
+        # Get search, sort, and filter parameters
+        search = request.args.get('search', '')
+        sort = request.args.get('sort', 'newest')
+        filter_type = request.args.get('filter', 'all')
+
+        # Base query
+        base_query = """
+            SELECT d.*, u.username 
+            FROM documents d 
+            JOIN users u ON d.user_id = u.id 
+        """
+
+        # Add search condition if search term is provided
+        search_condition = ""
+        if search:
+            search_condition = " WHERE d.original_filename LIKE %s"
+
+        # Add user filter for non-admin users
+        user_condition = ""
+        if role != 'admin':
             cur.execute("SELECT id FROM users WHERE username = %s", (username,))
             user = cur.fetchone()
             if not user:
-                # This case should be rare with before_request checks, but handle it
                 session.clear()
                 flash('User not found. Please log in again.', 'danger')
                 return redirect(url_for('login'))
             user_id = user[0]
-            cur.execute("""
-                SELECT d.*, u.username 
-                FROM documents d 
-                JOIN users u ON d.user_id = u.id 
-                WHERE d.user_id = %s 
-                ORDER BY d.upload_time DESC
-            """, (user_id,))
-            
+            user_condition = " WHERE d.user_id = %s" if not search_condition else " AND d.user_id = %s"
+
+        # Add date filter
+        date_condition = ""
+        if filter_type != 'all':
+            if filter_type == 'today':
+                date_condition = " AND DATE(d.upload_time) = CURDATE()"
+            elif filter_type == 'week':
+                date_condition = " AND YEARWEEK(d.upload_time) = YEARWEEK(CURDATE())"
+            elif filter_type == 'month':
+                date_condition = " AND MONTH(d.upload_time) = MONTH(CURDATE()) AND YEAR(d.upload_time) = YEAR(CURDATE())"
+
+        # Add sorting
+        sort_condition = ""
+        if sort == 'newest':
+            sort_condition = " ORDER BY d.upload_time DESC"
+        elif sort == 'oldest':
+            sort_condition = " ORDER BY d.upload_time ASC"
+        elif sort == 'name_asc':
+            sort_condition = " ORDER BY d.original_filename ASC"
+        elif sort == 'name_desc':
+            sort_condition = " ORDER BY d.original_filename DESC"
+
+        # Construct the final query
+        query = base_query
+        params = []
+
+        if search:
+            query += search_condition
+            params.append(f'%{search}%')
+
+        if role != 'admin':
+            query += user_condition
+            params.append(user_id)
+
+        if date_condition:
+            query += date_condition
+
+        query += sort_condition
+
+        # Execute the query
+        cur.execute(query, tuple(params))
         documents = cur.fetchall()
         cur.close()
 
@@ -1136,12 +1179,75 @@ def admin_dashboard():
     try:
         cur = mysql.connection.cursor()
 
-        # Fetch all users
-        cur.execute("SELECT id, username, email, role FROM users")
+        # Get search, sort, and filter parameters for users
+        user_search = request.args.get('user_search', '')
+        user_role = request.args.get('user_role', 'all')
+
+        # Get search, sort, and filter parameters for files
+        file_search = request.args.get('file_search', '')
+        file_sort = request.args.get('file_sort', 'newest')
+        file_filter = request.args.get('file_filter', 'all')
+
+        # Construct user query
+        user_query = "SELECT id, username, email, role FROM users"
+        user_params = []
+
+        if user_search or user_role != 'all':
+            user_query += " WHERE"
+            conditions = []
+
+            if user_search:
+                conditions.append(" (username LIKE %s OR email LIKE %s)")
+                user_params.extend([f'%{user_search}%', f'%{user_search}%'])
+
+            if user_role != 'all':
+                conditions.append(" role = %s")
+                user_params.append(user_role)
+
+            user_query += " AND ".join(conditions)
+
+        # Execute user query
+        cur.execute(user_query, tuple(user_params))
         users = cur.fetchall()
 
-        # Fetch all files
-        cur.execute("SELECT d.id, d.original_filename, u.username, d.upload_time FROM documents d JOIN users u ON d.user_id = u.id")
+        # Construct file query
+        file_query = """
+            SELECT d.id, d.original_filename, u.username, d.upload_time 
+            FROM documents d 
+            JOIN users u ON d.user_id = u.id
+        """
+        file_params = []
+
+        if file_search or file_filter != 'all':
+            file_query += " WHERE"
+            conditions = []
+
+            if file_search:
+                conditions.append(" d.original_filename LIKE %s")
+                file_params.append(f'%{file_search}%')
+
+            if file_filter != 'all':
+                if file_filter == 'today':
+                    conditions.append(" DATE(d.upload_time) = CURDATE()")
+                elif file_filter == 'week':
+                    conditions.append(" YEARWEEK(d.upload_time) = YEARWEEK(CURDATE())")
+                elif file_filter == 'month':
+                    conditions.append(" MONTH(d.upload_time) = MONTH(CURDATE()) AND YEAR(d.upload_time) = YEAR(CURDATE())")
+
+            file_query += " AND ".join(conditions)
+
+        # Add sorting for files
+        if file_sort == 'newest':
+            file_query += " ORDER BY d.upload_time DESC"
+        elif file_sort == 'oldest':
+            file_query += " ORDER BY d.upload_time ASC"
+        elif file_sort == 'name_asc':
+            file_query += " ORDER BY d.original_filename ASC"
+        elif file_sort == 'name_desc':
+            file_query += " ORDER BY d.original_filename DESC"
+
+        # Execute file query
+        cur.execute(file_query, tuple(file_params))
         files = cur.fetchall()
 
         return render_template('admin.html', users=users, files=files)

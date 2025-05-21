@@ -14,6 +14,42 @@
     </div>
 
     {% if documents %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('documents') }}" class="row g-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" name="search" placeholder="Search documents..." value="{{ request.args.get('search', '') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="sort">
+                                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest First</option>
+                                <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Oldest First</option>
+                                <option value="name_asc" {% if request.args.get('sort') == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+                                <option value="name_desc" {% if request.args.get('sort') == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="filter">
+                                <option value="all" {% if request.args.get('filter') == 'all' %}selected{% endif %}>All Documents</option>
+                                <option value="today" {% if request.args.get('filter') == 'today' %}selected{% endif %}>Today</option>
+                                <option value="week" {% if request.args.get('filter') == 'week' %}selected{% endif %}>This Week</option>
+                                <option value="month" {% if request.args.get('filter') == 'month' %}selected{% endif %}>This Month</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col">
             <div class="card">
